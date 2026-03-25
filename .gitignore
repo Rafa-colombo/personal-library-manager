@@ -1,6 +1,7 @@
 # Database ignore
 *.db
 *.sqlite3
+*.log
 
 # Arquivos de Build do PyInstaller
 build/
