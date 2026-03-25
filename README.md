@@ -44,4 +44,12 @@ Como o projeto não possui dependências externas, o setup é imediato:
 
 1. Clone o repositório:
    ```bash
-   git clone [https://github.com/SeuUsuario/seu-repositorio.git](https://github.com/SeuUsuario/seu-repositorio.git)
+   git clone [https://github.com/Rafa-colombo/personal-library-manager.git](https://github.com/Rafa-colombo/personal-library-manager.git)
+
+2. Entre na pasta do projeto:
+   ```bash
+   cd seu-repositorio
+
+3. Execute a aplicação:
+   ```bash
+   python main.py
