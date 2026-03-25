@@ -44,13 +44,30 @@ Como o projeto não possui dependências externas, o setup é imediato:
 
 1. Clone o repositório:
    ```bash
-   git clone [https://github.com/Rafa-colombo/personal-library-manager.git](https://github.com/Rafa-colombo/personal-library-manager.git)
-   git clone [https://github.com/SeuUsuario/seu-repositorio.git](https://github.com/SeuUsuario/seu-repositorio.git)
+   git clone https://github.com/Rafa-colombo/personal-library-manager.git
 
 2. Entre na pasta do projeto:
    ```bash
-   cd seu-repositorio
+   cd scr
 
 3. Execute a aplicação:
    ```bash
    python main.py
+
+## 🤝 Como Contribuir
+
+Contribuições são sempre bem-vindas! Para contribuir:
+
+Faça um Fork do projeto.
+
+1. Crie uma nova branch com a sua funcionalidade: git checkout -b feature/minha-nova-funcionalidade
+
+2. Salve suas alterações e faça o commit: git commit -m "feat: Adicionando exportação para CSV"
+
+3. Envie para o repositório original: git push origin feature/minha-nova-funcionalidade
+
+4. Abra um Pull Request.
+
+## 📄 Licença
+Este projeto está sob a licença MIT. Veja o arquivo LICENSE para mais detalhes. Sinta-se livre para usar, modificar e distribuir.
+
