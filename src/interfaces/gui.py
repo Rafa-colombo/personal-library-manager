@@ -29,7 +29,6 @@ class AppGUI:
         ttk.Label(frame_busca, text="🔍 Buscar Livro:").pack(side=tk.LEFT, padx=5)
         self.entry_busca = ttk.Entry(frame_busca, width=40)
         self.entry_busca.pack(side=tk.LEFT, padx=5)
-        # Binda o evento de soltar a tecla para rodar a função de busca
         self.entry_busca.bind("<KeyRelease>", self.realizar_busca)
 
         # ==========================================
@@ -80,7 +79,7 @@ class AppGUI:
         self.abas.add(self.aba_lidos, text="✅ Lidos")
 
         # Configurando as Tabelas (Treeviews)
-        colunas = ("Título", "Autor", "Status", "Data de Adição")
+        colunas = ("Título", "Autor", "Páginas", "Nota", "Data de Adição")
         
         # Tabela Wishlist
         self.tree_wish = ttk.Treeview(self.aba_wishlist, columns=colunas, show="headings")
@@ -98,28 +97,29 @@ class AppGUI:
         frame_acoes = ttk.Frame(self.root)
         frame_acoes.pack(pady=10)
         
-        ttk.Button(frame_acoes, text="📄 Ver Detalhes", command=self.ver_detalhes).pack(side=tk.LEFT, padx=5)
+        ttk.Button(frame_acoes, text="📄 Ver Detalhes / Editar", command=self.ver_detalhes).pack(side=tk.LEFT, padx=5)
         ttk.Button(frame_acoes, text="🔄 Alternar Status", command=self.alternar_status).pack(side=tk.LEFT, padx=5)
         ttk.Button(frame_acoes, text="🗑️ Apagar Selecionado", command=self.deletar).pack(side=tk.LEFT, padx=5)
 
-    def _configurar_tabela(self, tree):
-        # Define os cabeçalhos e as larguras das coluna      
-        tree.heading("Título", text="Título")
+    def _configurar_tabela(self, tree):        
+        tree.heading("Título", text="Título", command=lambda: self.ordenar_coluna(tree, "Título", False))
         tree.column("Título", width=300)
         
-        tree.heading("Autor", text="Autor")
+        tree.heading("Autor", text="Autor", command=lambda: self.ordenar_coluna(tree, "Autor", False))
         tree.column("Autor", width=200, anchor=tk.CENTER)
 
-        tree.heading("Status", text="Status")
-        tree.column("Status", width=100, anchor=tk.CENTER)
+        tree.heading("Nota", text="Nota", command=lambda: self.ordenar_coluna(tree, "Nota", False))
+        tree.column("Nota", width=50, anchor=tk.CENTER)
 
-        tree.heading("Data de Adição", text="Data de Adição")
+        tree.heading("Páginas", text="Páginas", command=lambda: self.ordenar_coluna(tree, "Páginas", False))
+        tree.column("Páginas", width=50, anchor=tk.CENTER)
+
+        tree.heading("Data de Adição", text="Data de Adição", command=lambda: self.ordenar_coluna(tree, "Data de Adição", False))
         tree.column("Data de Adição", width=120, anchor=tk.CENTER)
 
     # --- FUNÇÕES DE LÓGICA ---
 
     def _obter_selecao(self):
-        # Descobre qual aba está aberta para pegar o item certo
         aba_atual = self.abas.index(self.abas.select())
         tree_ativa = self.tree_wish if aba_atual == 0 else self.tree_lidos
         
@@ -128,9 +128,8 @@ class AppGUI:
             messagebox.showwarning("Aviso", "Selecione um livro na lista primeiro.")
             return None
         
-        # Retorna o ID do livro (que está na primeira coluna 'values'[0])
         item = tree_ativa.item(selecao[0])
-        return item['values'][4]
+        return item['values'][-1] # O ID oculto é sempre o último valor da tupla
 
     def realizar_busca(self, event):
         termo = self.entry_busca.get().lower()
@@ -159,7 +158,6 @@ class AppGUI:
 
     def deletar(self):
         livro_id = self._obter_selecao()
-        print(f"ID selecionado para deletar: {livro_id}")  # Debug
         if livro_id is None: return
 
         if messagebox.askyesno("Confirmar", f"Apagar o livro ID {livro_id}?"):
@@ -187,16 +185,85 @@ class AppGUI:
         if livro:
             janela = tk.Toplevel(self.root)
             janela.title(f"Detalhes: {livro[1]}")
-            janela.geometry("400x400")
+            janela.geometry("500x350")
+            
+            frame_input_edicao = ttk.LabelFrame(janela, text=" Ver detalhes ", padding=10)
+            frame_input_edicao.pack(pady=5, padx=10, fill=tk.BOTH, expand=True)
 
-            info = f"Título: {livro[1]}\nAutor: {livro[2]}\nPáginas: {livro[3]}\n"
-            info += f"Nota: {livro[5]}/10.0\nStatus: {livro[6]}\nAdicionado em: {livro[7]}\n\n"
-            info += f"Descrição:\n{livro[4]}"
+            ttk.Label(frame_input_edicao, text="Título*:").grid(row=0, column=0, sticky="e", pady=2)
+            self.entry_titulo_detalhes = ttk.Entry(frame_input_edicao, width=55)
+            self.entry_titulo_detalhes.grid(row=0, column=1, columnspan=3, sticky="w", pady=2)
+            self.entry_titulo_detalhes.insert(0, livro[1])
+            self.entry_titulo_detalhes.config(state='disabled')
 
-            text_box = scrolledtext.ScrolledText(janela, wrap=tk.WORD, width=45, height=20)
-            text_box.pack(padx=10, pady=10)
-            text_box.insert(tk.INSERT, info)
-            text_box.config(state=tk.DISABLED)
+            ttk.Label(frame_input_edicao, text="Autor:").grid(row=1, column=0, sticky="e", pady=2)
+            self.entry_autor_detalhes = ttk.Entry(frame_input_edicao, width=55)
+            self.entry_autor_detalhes.grid(row=1, column=1, columnspan=3, sticky="w", pady=2)
+            self.entry_autor_detalhes.insert(0, livro[2])
+            self.entry_autor_detalhes.config(state='disabled')
+
+            ttk.Label(frame_input_edicao, text="Páginas:").grid(row=2, column=0, sticky="e", pady=2)
+            self.entry_paginas_detalhes = ttk.Entry(frame_input_edicao, width=10)
+            self.entry_paginas_detalhes.grid(row=2, column=1, sticky="w", pady=2)
+            self.entry_paginas_detalhes.insert(0, livro[3])
+            self.entry_paginas_detalhes.config(state='disabled')
+
+            ttk.Label(frame_input_edicao, text="Nota (0-10):").grid(row=2, column=2, sticky="e", pady=2)
+            self.entry_nota_detalhes = ttk.Entry(frame_input_edicao, width=10)
+            self.entry_nota_detalhes.grid(row=2, column=3, sticky="w", pady=2)
+            self.entry_nota_detalhes.insert(0, livro[5])
+            self.entry_nota_detalhes.config(state='disabled')
+
+            ttk.Label(frame_input_edicao, text="Descrição:").grid(row=3, column=0, sticky="ne", pady=2)
+            self.text_descricao_detalhes = scrolledtext.ScrolledText(frame_input_edicao, width=45, height=6)
+            self.text_descricao_detalhes.grid(row=3, column=1, columnspan=3, pady=2)
+            self.text_descricao_detalhes.insert(tk.INSERT, livro[4])
+            self.text_descricao_detalhes.config(state=tk.DISABLED)
+
+            def habilitar_edicao():
+                self.entry_titulo_detalhes.config(state='normal')
+                self.entry_autor_detalhes.config(state='normal')
+                self.entry_paginas_detalhes.config(state='normal')
+                self.entry_nota_detalhes.config(state='normal')
+                self.text_descricao_detalhes.config(state=tk.NORMAL) 
+                btn_acao.config(text="Salvar Alterações", command=salvar_edicao)
+
+            def salvar_edicao():
+                try:
+                    novo_titulo = self.entry_titulo_detalhes.get()
+                    novo_autor = self.entry_autor_detalhes.get()
+                    novas_paginas = int(self.entry_paginas_detalhes.get())
+                    nova_nota = float(self.entry_nota_detalhes.get())
+                    nova_descricao = self.text_descricao_detalhes.get("1.0", tk.END).strip()
+                    status_atual = livro[6] # Mantém o status que já estava no banco
+
+                    if self.db.atualizar_livro(livro_id, novo_titulo, novo_autor, novas_paginas, nova_descricao, nova_nota, status_atual):
+                        
+                        self.entry_titulo_detalhes.config(state='disabled')
+                        self.entry_autor_detalhes.config(state='disabled')
+                        self.entry_paginas_detalhes.config(state='disabled')
+                        self.entry_nota_detalhes.config(state='disabled')
+                        self.text_descricao_detalhes.config(state=tk.DISABLED)
+
+                        btn_acao.config(text="Editar Informações", command=habilitar_edicao)
+                        self._atualizar_lista()
+                        messagebox.showinfo("Sucesso", "Informações atualizadas!")
+                except ValueError:
+                    messagebox.showerror("Erro", "Páginas precisa ser um número inteiro e Nota um número com ponto.")
+
+            btn_acao = ttk.Button(janela, text="Editar Informações", command=habilitar_edicao)
+            btn_acao.pack(pady=10)
+
+    def ordenar_coluna(self, tree, col, reverse):
+        """Ordena o conteúdo do Treeview ao clicar no cabeçalho da coluna."""
+        lista_valores = [(tree.set(k, col), k) for k in tree.get_children('')]
+        
+        lista_valores.sort(reverse=reverse)
+
+        for index, (val, k) in enumerate(lista_valores):
+            tree.move(k, '', index)
+
+        tree.heading(col, command=lambda: self.ordenar_coluna(tree, col, not reverse))
 
     def _limpar_campos(self):
         self.entry_titulo.delete(0, tk.END)
@@ -207,35 +274,37 @@ class AppGUI:
         self.entry_busca.delete(0, tk.END)
 
     def _atualizar_lista(self, filtro=""):
-        # Limpa as duas tabelas antes de repovoar
         for item in self.tree_wish.get_children(): self.tree_wish.delete(item)
         for item in self.tree_lidos.get_children(): self.tree_lidos.delete(item)
 
         livros = self.db.listar_livros()
         
         for livro in livros:
-            # Desempacota as 5 posições enviadas pelo banco
-            livro_id, titulo, autor, status, data_banco = livro[0], livro[1], livro[2], livro[3], livro[4]
+            livro_id = livro[0]
+            titulo = livro[1]
+            autor = livro[2]
+            paginas = livro[3]
+            data_banco = livro[4] 
+            status = livro[5]
+            nota = livro[6]
 
             try:
-                # Pega só a parte da data antes do espaço (ignora as horas)
-                data_string = data_banco.split(" ")[0] 
+                data_string = str(data_banco).split(" ")[0] 
                 data_obj = datetime.strptime(data_string, "%Y-%m-%d")
                 data_formatada = data_obj.strftime("%d/%m/%Y")
             except Exception:
                 data_formatada = "Desconhecida"
 
-            # Aplica o filtro da barra de busca
             if filtro and filtro not in titulo.lower() and filtro not in autor.lower():
                 continue
 
-            # Direciona o livro para a aba correspondente COM a data formatada
-            valores = (titulo, autor, status, data_formatada, livro_id)  # Inclui o ID para referência de funções
-            
-            if status == "Wishlist":
-                self.tree_wish.insert("", tk.END, values=valores)
+            # A tupla com os exatos 4 valores visíveis + o ID oculto no final
+            valores = (titulo, autor, paginas, nota, data_formatada, livro_id)  
+
+            if status == "Lido":
+                self.tree_lidos.insert('', tk.END, values=valores)
             else:
-                self.tree_lidos.insert("", tk.END, values=valores)
+                self.tree_wish.insert('', tk.END, values=valores)
 
     def on_closing(self):
         self.db.fechar_conexao()
