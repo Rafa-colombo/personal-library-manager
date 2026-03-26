@@ -54,7 +54,7 @@ class BibliotecaDB:
 
     def listar_livros(self):
         # Trazendo o autor junto para a listagem básica
-        self.cursor.execute("SELECT id, titulo, autor, status, data_adicao FROM livros")
+        self.cursor.execute("SELECT id, titulo, autor, paginas, data_adicao, status, nota FROM livros")
         return self.cursor.fetchall()
 
     def atualizar_status(self, livro_id: int, novo_status: str):
@@ -70,6 +70,26 @@ class BibliotecaDB:
             return False
         except Exception as e:
             log.error(f"Erro ao atualizar status do livro ID {livro_id}: {e}")
+            return False
+
+    def atualizar_livro(self, livro_id: int, titulo: str, autor: str, paginas: int, descricao: str, nota: float):
+        try:
+            sql = """
+            UPDATE livros 
+            SET titulo = ?, autor = ?, paginas = ?, descricao = ?, nota = ?
+            WHERE id = ?
+            """
+            valores = (titulo, autor, paginas, descricao, nota, livro_id)
+            self.cursor.execute(sql, valores)
+            self.conn.commit()
+            
+            # Verifica se alguma linha foi realmente alterada (se o ID existe)
+            if self.cursor.rowcount > 0:
+                log.info(f"Informações do livro ID {livro_id} atualizadas com sucesso.")
+                return True
+            return False
+        except Exception as e:
+            log.error(f"Erro ao atualizar o livro ID {livro_id}: {e}")
             return False
 
     def fechar_conexao(self):
