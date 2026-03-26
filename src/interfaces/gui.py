@@ -160,7 +160,10 @@ class AppGUI:
         livro_id = self._obter_selecao()
         if livro_id is None: return
 
-        if messagebox.askyesno("Confirmar", f"Apagar o livro ID {livro_id}?"):
+        livro = self.db.obter_detalhes(livro_id)
+        titulo = livro[1] 
+
+        if messagebox.askyesno("Confirmar", f"Apagar {titulo}?"):
             if self.db.deletar_livro(livro_id):
                 self._atualizar_lista()
 
@@ -235,9 +238,8 @@ class AppGUI:
                     novas_paginas = int(self.entry_paginas_detalhes.get())
                     nova_nota = float(self.entry_nota_detalhes.get())
                     nova_descricao = self.text_descricao_detalhes.get("1.0", tk.END).strip()
-                    status_atual = livro[6] # Mantém o status que já estava no banco
 
-                    if self.db.atualizar_livro(livro_id, novo_titulo, novo_autor, novas_paginas, nova_descricao, nova_nota, status_atual):
+                    if self.db.atualizar_livro(livro_id, novo_titulo, novo_autor, novas_paginas, nova_descricao, nova_nota):
                         
                         self.entry_titulo_detalhes.config(state='disabled')
                         self.entry_autor_detalhes.config(state='disabled')
@@ -247,7 +249,7 @@ class AppGUI:
 
                         btn_acao.config(text="Editar Informações", command=habilitar_edicao)
                         self._atualizar_lista()
-                        messagebox.showinfo("Sucesso", "Informações atualizadas!")
+                        # messagebox.showinfo("Sucesso", "Informações atualizadas!")
                 except ValueError:
                     messagebox.showerror("Erro", "Páginas precisa ser um número inteiro e Nota um número com ponto.")
 
